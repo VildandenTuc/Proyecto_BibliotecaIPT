@@ -400,7 +400,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ## 👨‍💻 Autor
 
-Desarrollado para el Instituto Provincial de Tucumán (IPT)
+Desarrollado por Guido Alfredo Albarracin {software developer} para el Instituto Privado Tucumán (IPT)
 
 ## 📞 Soporte
 
