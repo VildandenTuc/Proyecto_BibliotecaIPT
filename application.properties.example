@@ -1,0 +1,81 @@
+# =========================
+# ARCHIVO DE CONFIGURACIÓN DE EJEMPLO
+# =========================
+# Copia este archivo a src/main/resources/application.properties
+# y configura los valores según tu entorno
+
+# =========================
+# Configuración de la Aplicación
+# =========================
+spring.application.name=biblioteca
+spring.output.ansi.enabled=ALWAYS
+
+# =========================
+# Configuración de Base de Datos MySQL
+# =========================
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.url=jdbc:mysql://localhost:3306/dbbiblioteca
+spring.datasource.username=root
+spring.datasource.password=TU_PASSWORD_AQUI
+
+# =========================
+# Configuración de Hibernate
+# =========================
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+
+# =========================
+# Configuración de Flyway
+# =========================
+spring.flyway.enabled=true
+spring.flyway.table=flyway_schema_history
+spring.flyway.user=root
+spring.flyway.password=TU_PASSWORD_AQUI
+spring.flyway.locations=classpath:db/migration
+spring.flyway.baseline-on-migrate=true
+
+# =========================
+# Configuración JWT
+# =========================
+# IMPORTANTE: Cambiar en producción por una clave de al menos 32 caracteres
+biblioteca.jwt.secret=MiClaveSecretaSuperSeguraParaJWT2024DebibliotecaIPT
+
+# Expiración del token en milisegundos (24 horas = 86400000)
+biblioteca.jwt.expiration=86400000
+
+# =========================
+# Configuración de Spring Security
+# =========================
+spring.main.allow-bean-definition-overriding=true
+
+# =========================
+# DevTools (Desarrollo)
+# =========================
+# Descomentar solo en desarrollo
+# spring.devtools.restart.enabled=true
+# spring.devtools.restart.additional-exclude=**/*.properties
+
+# =========================
+# Configuración de Servidor
+# =========================
+server.port=8080
+
+# =========================
+# Configuración de Logs
+# =========================
+logging.level.root=INFO
+logging.level.com.iptucuman.biblioteca=DEBUG
+logging.level.org.springframework.security=DEBUG
+logging.level.org.hibernate.SQL=DEBUG
+logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
+
+# =========================
+# NOTAS IMPORTANTES:
+# =========================
+# 1. NO commitear este archivo con passwords reales
+# 2. Usar variables de entorno en producción
+# 3. Cambiar biblioteca.jwt.secret en producción
+# 4. Asegurar que la base de datos existe antes de ejecutar
+# 5. Flyway creará las tablas automáticamente

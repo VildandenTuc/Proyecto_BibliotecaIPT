@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # Base de datos MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: biblioteca-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: dbbiblioteca
+      MYSQL_USER: biblioteca_user
+      MYSQL_PASSWORD: biblioteca_pass
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - biblioteca-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aplicación Spring Boot
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: biblioteca-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: dbbiblioteca
+      DB_USER: biblioteca_user
+      DB_PASSWORD: biblioteca_pass
+      JWT_SECRET: MiClaveSecretaSuperSeguraParaJWT2024DebibliotecaIPT
+      JWT_EXPIRATION: 86400000
+      JAVA_OPTS: -Xmx512m -Xms256m
+    ports:
+      - "8080:8080"
+    networks:
+      - biblioteca-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  biblioteca-network:
+    driver: bridge

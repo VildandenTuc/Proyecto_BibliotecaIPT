@@ -1,0 +1,2 @@
+ALTER TABLE libros
+ADD COLUMN ejemplares INT NOT NULL DEFAULT 0;

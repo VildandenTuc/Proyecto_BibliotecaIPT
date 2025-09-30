@@ -1,0 +1,2 @@
+ALTER TABLE libros
+ADD COLUMN disponible BOOLEAN NOT NULL DEFAULT true;
