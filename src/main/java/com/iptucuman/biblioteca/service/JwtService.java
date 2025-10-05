@@ -11,9 +11,9 @@ public class JwtService {
 
     private final JwtUtil jwtUtil;
 
-    // 📌 Generar token para un usuario
+    // 📌 Generar token para un usuario (incluye authorities/roles)
     public String generateToken(UserDetails userDetails) {
-        return jwtUtil.generateToken(userDetails.getUsername());
+        return jwtUtil.generateTokenFromUserDetails(userDetails);
     }
 
     // 📌 Obtener username desde el token

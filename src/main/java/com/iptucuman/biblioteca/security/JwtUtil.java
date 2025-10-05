@@ -4,12 +4,17 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtUtil {
@@ -31,14 +36,34 @@ public class JwtUtil {
     }
 
 
-    // 📌 Generar un nuevo token JWT
+    // 📌 Generar un nuevo token JWT (método antiguo - mantener por compatibilidad)
     public String generateToken(String username) {
+        return generateToken(username, new HashMap<>());
+    }
+
+    // 📌 Generar token con claims personalizados (incluye authorities/roles)
+    public String generateToken(String username, Map<String, Object> extraClaims) {
         return Jwts.builder()
+                .setClaims(extraClaims)
                 .setSubject(username)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    // 📌 Generar token desde UserDetails (incluye authorities automáticamente)
+    public String generateTokenFromUserDetails(org.springframework.security.core.userdetails.UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+
+        // Extraer los roles/authorities del UserDetails
+        List<String> authorities = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+        claims.put("authorities", authorities);
+
+        return generateToken(userDetails.getUsername(), claims);
     }
 
     // 📌 Extraer el username (subject) desde el token
