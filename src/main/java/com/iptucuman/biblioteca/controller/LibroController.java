@@ -46,8 +46,26 @@ public class LibroController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "idLibro") String sort) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        Pageable pageable = PageRequest.of(page, size, parsearOrdenamiento(sort));
         return libroService.buscarLibrosDisponibles(pageable);
+    }
+
+    @GetMapping("/todos")
+    public Page<LibroDetalleDTO> listarTodos(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "idLibro") String sort) {
+        Pageable pageable = PageRequest.of(page, size, parsearOrdenamiento(sort));
+        return libroService.listarTodosConPage(pageable);
+    }
+
+    @GetMapping("/no-disponibles")
+    public Page<LibroDetalleDTO> listarNoDisponibles(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "idLibro") String sort) {
+        Pageable pageable = PageRequest.of(page, size, parsearOrdenamiento(sort));
+        return libroService.listarNoDisponiblesConPage(pageable);
     }
 
     @GetMapping("/{id}")
@@ -72,6 +90,12 @@ public class LibroController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/activar/{id}")
+    public ResponseEntity<Void> activarLibro(@PathVariable Integer id) {
+        libroService.activarLibro(id);
+        return ResponseEntity.noContent().build();
+    }
+
     /*
     @GetMapping("/buscar/categoria/{id}")
     public ResponseEntity<List<LibroRespuestaDTO>> buscarPorCategoria(@PathVariable Integer id){
@@ -83,7 +107,7 @@ public class LibroController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "idLibro") String sort) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        Pageable pageable = PageRequest.of(page, size, parsearOrdenamiento(sort));
         return libroService.buscarPorCategoria(idCategoria, pageable);
     }
 
@@ -98,8 +122,40 @@ public class LibroController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "idLibro") String sort) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        Pageable pageable = PageRequest.of(page, size, parsearOrdenamiento(sort));
         return libroService.buscarPorAutor(autor, pageable);
+    }
+
+    @GetMapping("/titulo")
+    public Page<LibroDetalleDTO> buscarPorTitulo(
+            @RequestParam String titulo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "idLibro") String sort) {
+        Pageable pageable = PageRequest.of(page, size, parsearOrdenamiento(sort));
+        return libroService.buscarPorTitulo(titulo, pageable);
+    }
+
+    /**
+     * Método helper para parsear el parámetro sort que puede venir como "campo" o "campo,direccion"
+     */
+    private Sort parsearOrdenamiento(String sort) {
+        if (sort == null || sort.isEmpty()) {
+            return Sort.by(Sort.Direction.ASC, "idLibro");
+        }
+
+        String[] partes = sort.split(",");
+        String campo = partes[0].trim();
+
+        if (partes.length > 1) {
+            String direccion = partes[1].trim();
+            Sort.Direction direction = direccion.equalsIgnoreCase("desc")
+                    ? Sort.Direction.DESC
+                    : Sort.Direction.ASC;
+            return Sort.by(direction, campo);
+        }
+
+        return Sort.by(Sort.Direction.ASC, campo);
     }
 
 }

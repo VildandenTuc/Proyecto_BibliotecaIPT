@@ -66,6 +66,21 @@ public class JwtUtil {
         return generateToken(userDetails.getUsername(), claims);
     }
 
+    // 📌 Generar token desde UserDetails incluyendo el userId (NUEVO)
+    public String generateTokenWithUserId(org.springframework.security.core.userdetails.UserDetails userDetails, Integer userId) {
+        Map<String, Object> claims = new HashMap<>();
+
+        // Extraer los roles/authorities del UserDetails
+        List<String> authorities = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+        claims.put("authorities", authorities);
+        claims.put("userId", userId); // Agregar el ID del usuario al token
+
+        return generateToken(userDetails.getUsername(), claims);
+    }
+
     // 📌 Extraer el username (subject) desde el token
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

@@ -38,6 +38,16 @@ public class PrestamoController {
         return ResponseEntity.ok(prestamoService.listarPrestamos());
     }
 
+    @GetMapping("/todos")
+    public Page<PrestamoRespuestaDTO> listarTodosPaginado(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "fechaPrestamo,desc") String[] sort) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(parseSort(sort)));
+        return prestamoService.listarPrestamosPaginado(pageable);
+    }
+
     @PutMapping("/devolver")
     public ResponseEntity<Void> devolverPrestamo(@RequestBody @Valid PrestamoDevolucionDTO dto){
         prestamoService.registrarDevolucion(dto.idPrestamo());
@@ -138,9 +148,9 @@ public class PrestamoController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "fechaPrestamo") String sort) {
+            @RequestParam(defaultValue = "fechaPrestamo,desc") String[] sort) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(parseSort(sort)));
         return prestamoService.buscarPorFechaPrestamoEntre(desde, hasta, pageable);
     }
 
@@ -205,6 +215,11 @@ public class PrestamoController {
     @GetMapping("/historial/usuario/{idUsuario}")
     public ResponseEntity<List<PrestamoRespuestaDTO>> obtenerHistorialPorUsuario(@PathVariable Integer idUsuario) {
         return ResponseEntity.ok(prestamoService.buscarHistorialPorUsuario(idUsuario));
+    }
+
+    @GetMapping("/contador/usuario/{idUsuario}")
+    public ResponseEntity<Long> contarPrestamosActivosPorUsuario(@PathVariable Integer idUsuario) {
+        return ResponseEntity.ok(prestamoService.contarPrestamosActivosPorUsuario(idUsuario));
     }
 
     @GetMapping("/vencimientos-proximos")

@@ -22,6 +22,7 @@ public class Usuario {
     private String apellido;
 
     @Pattern(regexp = "\\d{7,8}", message = "El DNI debe tener entre 7 y 8 dígitos numéricos.")
+    @Column(unique = true, nullable = false)
     private String dni;
 
     @Enumerated(EnumType.STRING)

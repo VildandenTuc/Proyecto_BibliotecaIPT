@@ -76,6 +76,22 @@ public class PrestamoService {
                 .toList();
     }
 
+    public Page<PrestamoRespuestaDTO> listarPrestamosPaginado(Pageable pageable){
+        return prestamoRepository.findAll(pageable)
+                .map(prestamo -> new PrestamoRespuestaDTO(
+                        prestamo.getIdPrestamo(),
+                        prestamo.getUsuario().getNombre(),
+                        prestamo.getUsuario().getApellido(),
+                        prestamo.getLibro().getTitulo(),
+                        prestamo.getFechaPrestamo(),
+                        prestamo.getFechaDevolucionEsperada(),
+                        prestamo.getFechaDevolucionReal(),
+                        prestamo.getDevuelto(),
+                        prestamo.getFalta(),
+                        prestamo.getObservacion()
+                ));
+    }
+
     @Transactional
     public void registrarDevolucion(Integer idPrestamo){
         //Forma que hice inicialmente
@@ -112,7 +128,13 @@ public class PrestamoService {
         }
 
         prestamo.setDevuelto(true);
-        prestamo.setFechaDevolucionReal(LocalDate.now());
+        LocalDate fechaDevolucionReal = LocalDate.now();
+        prestamo.setFechaDevolucionReal(fechaDevolucionReal);
+
+        // Verificar si hay falta (devolución tardía)
+        if (fechaDevolucionReal.isAfter(prestamo.getFechaDevolucionEsperada())) {
+            prestamo.setFalta(true);
+        }
 
         // Aumentar stock del libro
         Libro libro = prestamo.getLibro();
@@ -315,6 +337,10 @@ public class PrestamoService {
         return prestamos.stream()
                 .map(this::mapearADTO)
                 .toList();
+    }
+
+    public long contarPrestamosActivosPorUsuario(Integer idUsuario) {
+        return prestamoRepository.countByUsuarioIdUsuarioAndDevueltoFalse(idUsuario);
     }
 
     public List<PrestamoRespuestaDTO> buscarVencimientosProximos(int dias) {

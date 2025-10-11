@@ -29,8 +29,8 @@ public class CategoriaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoriaDetalleDTO>> listarConList(){
-        return ResponseEntity.ok(categoriaService.listarCategoriaConList());
+    public ResponseEntity<List<CategoriaRespuestaDTO>> listarConList(){
+        return ResponseEntity.ok(categoriaService.listarTodasConEstado());
     }
 
     @GetMapping("/paginas")
@@ -63,6 +63,12 @@ public class CategoriaController {
     @DeleteMapping("/eliminacion-logica/{id}")
     public ResponseEntity<Void> eliminarPorIdLogica(@PathVariable Integer id){
         categoriaService.eliminarCategoriaLogica(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/activar/{id}")
+    public ResponseEntity<Void> activarCategoria(@PathVariable Integer id){
+        categoriaService.activarCategoria(id);
         return ResponseEntity.noContent().build();
     }
 

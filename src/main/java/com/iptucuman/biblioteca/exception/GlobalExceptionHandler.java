@@ -1,5 +1,6 @@
 package com.iptucuman.biblioteca.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -36,6 +37,35 @@ public class GlobalExceptionHandler {
                 errores.put(error.getField(), error.getDefaultMessage())
         );
         return new ResponseEntity<>(errores, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<Object> manejarRecursoDuplicado(DuplicateResourceException ex) {
+        return new ResponseEntity<>(
+                generarCuerpoError(ex.getMessage(), HttpStatus.CONFLICT),
+                HttpStatus.CONFLICT
+        );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Object> manejarViolacionIntegridad(DataIntegrityViolationException ex) {
+        String mensaje = "Ya existe un registro con esos datos únicos";
+
+        // Detectar tipo específico de violación según el mensaje de error
+        String errorMsg = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
+
+        if (errorMsg.contains("dni")) {
+            mensaje = "Ya existe un usuario con ese DNI";
+        } else if (errorMsg.contains("email")) {
+            mensaje = "Ya existe un usuario con ese email";
+        } else if (errorMsg.contains("nombre") && errorMsg.contains("categorias")) {
+            mensaje = "Ya existe una categoría con ese nombre";
+        }
+
+        return new ResponseEntity<>(
+                generarCuerpoError(mensaje, HttpStatus.CONFLICT),
+                HttpStatus.CONFLICT
+        );
     }
 
     @ExceptionHandler(Exception.class)

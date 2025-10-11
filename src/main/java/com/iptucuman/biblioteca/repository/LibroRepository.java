@@ -27,9 +27,15 @@ public interface LibroRepository extends JpaRepository<Libro, Integer> {
     """)
     Page<Libro> buscarPorAutor(@Param("autor") String autor, Pageable pageable);
 
+    @Query("""
+    SELECT l FROM Libro l
+    WHERE LOWER(l.titulo) LIKE LOWER(CONCAT('%', :titulo, '%'))
+    """)
+    Page<Libro> buscarPorTitulo(@Param("titulo") String titulo, Pageable pageable);
+
     //List<Libro> findByDisponibleTrue();
     Page<Libro> findByDisponibleTrue(Pageable pageable);
 
-
+    Page<Libro> findByDisponibleFalse(Pageable pageable);
 
 }

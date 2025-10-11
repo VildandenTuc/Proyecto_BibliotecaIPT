@@ -5,6 +5,7 @@ import com.iptucuman.biblioteca.dto.UsuarioDetalleDTO;
 import com.iptucuman.biblioteca.dto.UsuarioRegistroDTO;
 import com.iptucuman.biblioteca.dto.UsuarioRegistroConPasswordDTO;
 import com.iptucuman.biblioteca.dto.UsuarioRespuestaDTO;
+import com.iptucuman.biblioteca.exception.DuplicateResourceException;
 import com.iptucuman.biblioteca.exception.ResourceNotFoundException;
 import com.iptucuman.biblioteca.modelo.TipoUsuario;
 import com.iptucuman.biblioteca.modelo.Usuario;
@@ -32,6 +33,11 @@ public class UsuarioService {
 
     // Registrar usuario (sin password - mantener para compatibilidad)
     public UsuarioDetalleDTO registrarUsuario(UsuarioRegistroDTO dto) {
+        // Validar DNI duplicado
+        if (usuarioRepository.existsByDni(dto.dni())) {
+            throw new DuplicateResourceException("Ya existe un usuario con el DNI: " + dto.dni());
+        }
+
         Usuario usuario = new Usuario();
         usuario.setNombre(dto.nombre());
         usuario.setApellido(dto.apellido());
@@ -60,6 +66,11 @@ public class UsuarioService {
 
     // Registrar usuario con password (nuevo método)
     public UsuarioDetalleDTO registrarUsuarioConPassword(UsuarioRegistroConPasswordDTO dto) {
+        // Validar DNI duplicado
+        if (usuarioRepository.existsByDni(dto.dni())) {
+            throw new DuplicateResourceException("Ya existe un usuario con el DNI: " + dto.dni());
+        }
+
         Usuario usuario = new Usuario();
         usuario.setNombre(dto.nombre());
         usuario.setApellido(dto.apellido());
@@ -140,6 +151,21 @@ public class UsuarioService {
     //Listar usuarios por activos=true con paginado
     public Page<UsuarioDetalleDTO> listarUsuariosActivosPaginados(Pageable pageable) {
         return usuarioRepository.findByActivoTrue(pageable)
+                .map(u -> new UsuarioDetalleDTO(
+                        u.getIdUsuario(),
+                        u.getNombre(),
+                        u.getApellido(),
+                        u.getDni(),
+                        u.getTipoUsuario(),
+                        u.getEmail(),
+                        u.getTelefono(),
+                        u.getActivo()
+                ));
+    }
+
+    //Listar usuarios por activos=false con paginado
+    public Page<UsuarioDetalleDTO> listarUsuariosInactivosPaginados(Pageable pageable) {
+        return usuarioRepository.findByActivoFalse(pageable)
                 .map(u -> new UsuarioDetalleDTO(
                         u.getIdUsuario(),
                         u.getNombre(),

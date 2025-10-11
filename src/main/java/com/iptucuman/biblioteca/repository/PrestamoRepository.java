@@ -104,6 +104,9 @@ public interface PrestamoRepository extends JpaRepository<Prestamo, Integer> {
 
     List<Prestamo> findByUsuarioIdUsuarioAndDevueltoFalse(Integer idUsuario);
 
+    // Contar préstamos activos de un usuario
+    long countByUsuarioIdUsuarioAndDevueltoFalse(Integer idUsuario);
+
     @Query("""
     SELECT COUNT(p) > 0 FROM Prestamo p
     WHERE p.usuario.idUsuario = :idUsuario

@@ -44,6 +44,13 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarios);
     }
 
+    //Endpoint para listar usuarios inactivos=false con page
+    @GetMapping("/inactivos")
+    public ResponseEntity<Page<UsuarioDetalleDTO>> listarInactivosPaginados(Pageable pageable) {
+        Page<UsuarioDetalleDTO> usuarios = usuarioService.listarUsuariosInactivosPaginados(pageable);
+        return ResponseEntity.ok(usuarios);
+    }
+
     //Endpoint para listar TODOS los usuarios con LIST
     /*@GetMapping
     public ResponseEntity<List<UsuarioDetalleDTO>> listar() {

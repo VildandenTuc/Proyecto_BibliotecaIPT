@@ -89,6 +89,18 @@ public class LibroService {
                 .map(this::mapearADetalleDTO);
     }
 
+    /*Lista TODOS los libros con paginación (disponibles y no disponibles)*/
+    public Page<LibroDetalleDTO> listarTodosConPage(Pageable pageable) {
+        return libroRepository.findAll(pageable)
+                .map(this::mapearADetalleDTO);
+    }
+
+    /*Lista solo los libros NO disponibles con paginación*/
+    public Page<LibroDetalleDTO> listarNoDisponiblesConPage(Pageable pageable) {
+        return libroRepository.findByDisponibleFalse(pageable)
+                .map(this::mapearADetalleDTO);
+    }
+
     /*Obtener Libro por ID*/
     public LibroDetalleDTO obtenerLibroPorId(Integer id){
         Libro libro = libroRepository.findById(id)
@@ -150,6 +162,14 @@ public class LibroService {
         libro.setDisponible(false);
     }
 
+    @Transactional
+    public void activarLibro(Integer id){
+        Libro libro = libroRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Libro no encontrado."));
+
+        libro.setDisponible(true);
+    }
+
     /*
     public List<LibroRespuestaDTO> buscarPorCategoria(Integer categoria){
         return libroRepository.findByCategoriaIdCategoria(categoria)
@@ -185,6 +205,11 @@ public class LibroService {
     }*/
     public Page<LibroDetalleDTO> buscarPorAutor(String autor, Pageable pageable) {
         return libroRepository.buscarPorAutor(autor, pageable)
+                .map(this::mapearADetalleDTO);
+    }
+
+    public Page<LibroDetalleDTO> buscarPorTitulo(String titulo, Pageable pageable) {
+        return libroRepository.buscarPorTitulo(titulo, pageable)
                 .map(this::mapearADetalleDTO);
     }
 

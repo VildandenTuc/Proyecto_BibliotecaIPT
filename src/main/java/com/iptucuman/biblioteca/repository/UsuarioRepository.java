@@ -17,7 +17,12 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     //busca solo usuarios activos con Page
     Page<Usuario> findByActivoTrue(Pageable pageable);
+
+    //busca solo usuarios inactivos con Page
+    Page<Usuario> findByActivoFalse(Pageable pageable);
+
     Optional<Usuario> findByDni(String dni);
+    boolean existsByDni(String dni);
 
     @Query("""
     SELECT u FROM Usuario u

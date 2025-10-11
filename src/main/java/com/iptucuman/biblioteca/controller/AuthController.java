@@ -47,7 +47,14 @@ public class AuthController {
             UserDetails user = userDetailsService.loadUserByUsername(request.email());
             System.out.println("DEBUG: Usuario cargado: " + user.getUsername());
 
-            String token = jwtService.generateToken(user);
+            // Obtener el ID del usuario desde la base de datos
+            var usuario = usuarioService.buscarPorEmail(request.email())
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            Integer userId = usuario.getIdUsuario();
+            System.out.println("DEBUG: userId obtenido: " + userId);
+
+            // Generar token incluyendo el userId
+            String token = jwtService.generateTokenWithUserId(user, userId);
             System.out.println("DEBUG: Token generado: " + token.substring(0, 20) + "...");
 
             return ResponseEntity.ok(new AuthResponse(token));

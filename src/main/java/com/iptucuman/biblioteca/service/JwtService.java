@@ -16,6 +16,11 @@ public class JwtService {
         return jwtUtil.generateTokenFromUserDetails(userDetails);
     }
 
+    // 📌 Generar token para un usuario incluyendo el userId (NUEVO)
+    public String generateTokenWithUserId(UserDetails userDetails, Integer userId) {
+        return jwtUtil.generateTokenWithUserId(userDetails, userId);
+    }
+
     // 📌 Obtener username desde el token
     public String extractUsername(String token) {
         return jwtUtil.extractUsername(token);
