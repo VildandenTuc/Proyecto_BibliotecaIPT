@@ -1,5 +1,6 @@
 package com.iptucuman.biblioteca.service;
 
+import com.iptucuman.biblioteca.dto.CambiarPasswordDTO;
 import com.iptucuman.biblioteca.dto.UsuarioActualizarDTO;
 import com.iptucuman.biblioteca.dto.UsuarioDetalleDTO;
 import com.iptucuman.biblioteca.dto.UsuarioRegistroDTO;
@@ -337,6 +338,22 @@ public class UsuarioService {
 
     public Usuario guardar(Usuario usuario) {
         return usuarioRepository.save(usuario);
+    }
+
+    // 🔒 Cambiar contraseña de usuario
+    public void cambiarPassword(Integer id, CambiarPasswordDTO dto) {
+        // Buscar el usuario
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + id));
+
+        // Verificar que la contraseña actual sea correcta
+        if (!passwordEncoder.matches(dto.passwordActual(), usuario.getPassword())) {
+            throw new IllegalArgumentException("La contraseña actual es incorrecta");
+        }
+
+        // Encriptar y actualizar la nueva contraseña
+        usuario.setPassword(passwordEncoder.encode(dto.passwordNuevo()));
+        usuarioRepository.save(usuario);
     }
 
 }

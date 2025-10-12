@@ -22,8 +22,14 @@ public class JwtService {
     }
 
     // 📌 Obtener username desde el token
+    // NOTA: Ahora retorna el userId como String (para compatibilidad con código antiguo)
     public String extractUsername(String token) {
         return jwtUtil.extractUsername(token);
+    }
+
+    // 📌 Extraer userId desde el token
+    public Integer extractUserId(String token) {
+        return jwtUtil.extractUserId(token);
     }
 
     // 📌 Validar el token contra un usuario

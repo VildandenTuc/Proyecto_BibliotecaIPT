@@ -76,14 +76,33 @@ public class JwtUtil {
                 .collect(Collectors.toList());
 
         claims.put("authorities", authorities);
-        claims.put("userId", userId); // Agregar el ID del usuario al token
+        claims.put("email", userDetails.getUsername()); // Guardar el email como claim
 
-        return generateToken(userDetails.getUsername(), claims);
+        // CAMBIO: Usar userId como subject en lugar del email
+        return generateTokenFromUserId(userId.toString(), claims);
+    }
+
+    // 📌 Generar token usando userId como subject
+    private String generateTokenFromUserId(String userId, Map<String, Object> extraClaims) {
+        return Jwts.builder()
+                .setClaims(extraClaims)
+                .setSubject(userId) // userId es el subject
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     // 📌 Extraer el username (subject) desde el token
+    // NOTA: Ahora el subject es el userId, pero mantenemos el nombre para compatibilidad
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    // 📌 Extraer el userId (subject) desde el token
+    public Integer extractUserId(String token) {
+        String userIdStr = extractClaim(token, Claims::getSubject);
+        return Integer.parseInt(userIdStr);
     }
 
     // 📌 Extraer cualquier claim genérico

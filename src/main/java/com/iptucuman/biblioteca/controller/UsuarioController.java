@@ -1,5 +1,6 @@
 package com.iptucuman.biblioteca.controller;
 
+import com.iptucuman.biblioteca.dto.CambiarPasswordDTO;
 import com.iptucuman.biblioteca.dto.UsuarioActualizarDTO;
 import com.iptucuman.biblioteca.dto.UsuarioDetalleDTO;
 import com.iptucuman.biblioteca.dto.UsuarioRegistroDTO;
@@ -142,5 +143,19 @@ public class UsuarioController {
         return usuarioService.buscarActivosPorTipo(tipo, pageable);
     }
 
+    // 🔒 Endpoint para cambiar contraseña
+    @PutMapping("/{id}/cambiar-password")
+    public ResponseEntity<?> cambiarPassword(@PathVariable Integer id,
+                                              @RequestBody @Valid CambiarPasswordDTO dto) {
+        try {
+            usuarioService.cambiarPassword(id, dto);
+            return ResponseEntity.ok().body("Contraseña actualizada exitosamente");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al cambiar la contraseña: " + e.getMessage());
+        }
+    }
 
 }

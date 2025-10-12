@@ -27,4 +27,16 @@ public class UsuarioDetailsService implements UserDetailsService {
                 List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRol()))
         );
     }
+
+    // 📌 Cargar usuario por ID (para JWT con userId como subject)
+    public UserDetails loadUserById(Integer userId) throws UsernameNotFoundException {
+        Usuario usuario = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con ID: " + userId));
+
+        return new User(
+                usuario.getEmail(),
+                usuario.getPassword(),
+                List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRol()))
+        );
+    }
 }
