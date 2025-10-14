@@ -41,10 +41,10 @@ public class PrestamoController {
     @GetMapping("/todos")
     public Page<PrestamoRespuestaDTO> listarTodosPaginado(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "fechaPrestamo,desc") String[] sort) {
+            @RequestParam(defaultValue = "10") int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(parseSort(sort)));
+        // Ordenar siempre por fecha de préstamo descendente (más nuevos primero)
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("fechaPrestamo")));
         return prestamoService.listarPrestamosPaginado(pageable);
     }
 
@@ -89,10 +89,9 @@ public class PrestamoController {
     public Page<PrestamoRespuestaDTO> buscarPorNombreApellidoUsuario(
             @RequestParam String texto,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "idPrestamo,asc") String[] sort) {
+            @RequestParam(defaultValue = "10") int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(parseSort(sort)));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("fechaPrestamo")));
         return prestamoService.buscarPorNombreApellidoUsuario(texto, pageable);
     }
 
@@ -105,10 +104,9 @@ public class PrestamoController {
     public Page<PrestamoRespuestaDTO> buscarPorTituloLibro(
             @RequestParam String titulo,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "idPrestamo") String sort) {
+            @RequestParam(defaultValue = "10") int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("fechaPrestamo")));
         return prestamoService.buscarPorTituloLibro(titulo, pageable);
     }
 
@@ -127,10 +125,9 @@ public class PrestamoController {
     public Page<PrestamoRespuestaDTO> buscarPorDniUsuario(
             @RequestParam String dni,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "idPrestamo") String sort) {
+            @RequestParam(defaultValue = "10") int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("fechaPrestamo")));
         return prestamoService.buscarPorDniUsuario(dni, pageable);
     }
 
@@ -147,10 +144,9 @@ public class PrestamoController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "fechaPrestamo,desc") String[] sort) {
+            @RequestParam(defaultValue = "10") int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(parseSort(sort)));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("fechaPrestamo")));
         return prestamoService.buscarPorFechaPrestamoEntre(desde, hasta, pageable);
     }
 
@@ -182,10 +178,9 @@ public class PrestamoController {
     @GetMapping("/buscar/vencidos-no-devueltos")
     public Page<PrestamoRespuestaDTO> buscarVencidosNoDevueltos(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "fechaDevolucionEsperada") String sort) {
+            @RequestParam(defaultValue = "10") int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("fechaPrestamo")));
         LocalDate hoy = LocalDate.now();
         return prestamoService.buscarVencidosNoDevueltos(hoy, pageable);
     }
@@ -199,10 +194,9 @@ public class PrestamoController {
     @GetMapping("/buscar/faltas")
     public Page<PrestamoRespuestaDTO> buscarPorFalta(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "fechaPrestamo") String sort) {
+            @RequestParam(defaultValue = "10") int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("fechaPrestamo")));
         return prestamoService.buscarPorFalta(pageable);
     }
 
@@ -250,10 +244,14 @@ public class PrestamoController {
             String[] parts = param.split(",");
             if (parts.length == 2) {
                 orders.add(new Sort.Order(Sort.Direction.fromString(parts[1]), parts[0]));
-            } else {
-                // Ignora los parámetros inválidos
-                continue;
+            } else if (parts.length == 1) {
+                // Si solo hay campo sin dirección, asumir ascendente
+                orders.add(new Sort.Order(Sort.Direction.ASC, parts[0]));
             }
+        }
+        // Si no hay criterios válidos, ordenar por fechaPrestamo descendente por defecto
+        if (orders.isEmpty()) {
+            orders.add(new Sort.Order(Sort.Direction.DESC, "fechaPrestamo"));
         }
         return orders;
     }
