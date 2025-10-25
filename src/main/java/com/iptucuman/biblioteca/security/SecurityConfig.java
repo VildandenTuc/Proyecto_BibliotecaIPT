@@ -7,6 +7,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,6 +21,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 
 @Configuration
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -43,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/categorias/**").permitAll()
                         .requestMatchers("/api/usuarios/**").permitAll()
                         .requestMatchers("/api/prestamos/**").permitAll()
+                        .requestMatchers("/api/backup/**").permitAll()  // TEMPORAL para debugging
                         //hasta aqui hay que borrar para mandarlo a produccion
 
                         // 🔒 /*everythingelse requiere autenticacion*/

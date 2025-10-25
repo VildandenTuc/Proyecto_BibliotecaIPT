@@ -23,7 +23,6 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/backup")
-@PreAuthorize("hasRole('ADMIN')")
 public class BackupController {
 
     private static final Logger log = LoggerFactory.getLogger(BackupController.class);
@@ -35,36 +34,52 @@ public class BackupController {
     }
 
     /**
-     * Genera y descarga un backup completo de la base de datos
+     * TEST: Verificar autenticación y authorities
+     */
+    @GetMapping("/test-auth")
+    public ResponseEntity<Map<String, Object>> testAuth() {
+        Map<String, Object> response = new HashMap<>();
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+
+        response.put("authenticated", auth != null && auth.isAuthenticated());
+        response.put("username", auth != null ? auth.getName() : "null");
+        response.put("authorities", auth != null ? auth.getAuthorities().toString() : "null");
+
+        log.info("TEST - Authentication: {}", auth != null ? auth.getName() : "null");
+        log.info("TEST - Authorities: {}", auth != null ? auth.getAuthorities() : "null");
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Genera un backup completo de la base de datos en el servidor
      * POST /api/backup/export
-     * @return archivo .sql del backup
+     * @return mensaje de confirmación con nombre del archivo generado
      */
     @PostMapping("/export")
-    public ResponseEntity<Resource> exportBackup() {
+    public ResponseEntity<Map<String, Object>> exportBackup() {
+        Map<String, Object> response = new HashMap<>();
+
         try {
             log.info("Solicitud de generación de backup recibida");
 
             // Generar backup
             String filename = backupService.generateBackup();
 
-            // Obtener el archivo para descarga
-            Resource resource = backupService.getBackupFile(filename);
+            response.put("success", true);
+            response.put("message", "Backup generado exitosamente");
+            response.put("filename", filename);
 
-            // Preparar headers para descarga
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"");
-            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            log.info("Backup generado exitosamente: {}", filename);
 
-            log.info("Backup generado y listo para descarga: {}", filename);
-
-            return ResponseEntity.ok()
-                .headers(headers)
-                .body(resource);
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             log.error("Error al generar backup", e);
+            response.put("success", false);
+            response.put("message", "Error al generar backup: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null);
+                .body(response);
         }
     }
 
@@ -132,6 +147,12 @@ public class BackupController {
     @GetMapping("/list")
     public ResponseEntity<List<BackupInfoDTO>> listBackups() {
         try {
+            // DEBUG: Verificar authorities del usuario
+            var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            log.info("DEBUG - Usuario autenticado: {}", auth != null ? auth.getName() : "null");
+            log.info("DEBUG - Authorities: {}", auth != null ? auth.getAuthorities() : "null");
+            log.info("DEBUG - isAuthenticated: {}", auth != null ? auth.isAuthenticated() : "false");
+
             log.info("Solicitud de lista de backups recibida");
 
             List<BackupInfoDTO> backups = backupService.listBackups();

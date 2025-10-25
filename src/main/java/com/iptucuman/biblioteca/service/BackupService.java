@@ -30,6 +30,12 @@ public class BackupService {
     @Value("${backup.directory}")
     private String backupDirectory;
 
+    @Value("${backup.mysqldump.path}")
+    private String mysqldumpPath;
+
+    @Value("${backup.mysql.path}")
+    private String mysqlPath;
+
     @Value("${spring.datasource.url}")
     private String dbUrl;
 
@@ -64,10 +70,10 @@ public class BackupService {
 
         log.info("Iniciando generación de backup: {}", filename);
 
-        // Ejecutar mysqldump (Windows)
+        // Ejecutar mysqldump (Windows) con ruta completa
         String command = String.format(
-            "mysqldump -u%s -p%s --add-drop-table --databases %s --result-file=\"%s\"",
-            dbUsername, dbPassword, dbName, filepath
+            "\"%s\" -u%s -p%s --add-drop-table --databases %s --result-file=\"%s\"",
+            mysqldumpPath, dbUsername, dbPassword, dbName, filepath
         );
 
         try {
@@ -137,10 +143,10 @@ public class BackupService {
             // Extraer nombre de BD
             String dbName = extractDatabaseName(dbUrl);
 
-            // Ejecutar restore con mysql (Windows)
+            // Ejecutar restore con mysql (Windows) usando ruta completa
             String command = String.format(
-                "cmd.exe /c mysql -u%s -p%s %s < \"%s\"",
-                dbUsername, dbPassword, dbName, tempFile
+                "cmd.exe /c \"\"%s\" -u%s -p%s %s < \"%s\"\"",
+                mysqlPath, dbUsername, dbPassword, dbName, tempFile
             );
 
             Process process = Runtime.getRuntime().exec(command);
